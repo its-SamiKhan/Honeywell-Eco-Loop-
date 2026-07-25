@@ -390,7 +390,7 @@
                 logContainer.innerHTML = '';
                 
                 // Show rows where agent reason is logged
-                const records = data.chart_data.optimized.filter(r => r.AgentReasoning && r.AgentReasoning !== "Using default fallback setpoints");
+                const records = data.chart_data.optimized.filter(r => r.AgentReasoning && !r.AgentReasoning.toLowerCase().includes("default fallback"));
                 
                 if (records.length === 0) {
                     logContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">No agent decision overrides found in logs.</div>';
