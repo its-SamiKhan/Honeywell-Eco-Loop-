@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco-Loop Building AI Optimization Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(22, 28, 45, 0.65);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --primary-accent: #00ffcc;
+            --secondary-accent: #3b82f6;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --shadow-glow: rgba(0, 255, 204, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(0, 255, 204, 0.08) 0%, transparent 40%);
+        }
+
+        header {
+            padding: 2.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 15, 25, 0.8);
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #ffffff, var(--primary-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--primary-accent);
+            border: 1px solid rgba(0, 255, 204, 0.25);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 15px var(--shadow-glow);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--secondary-accent);
+        }
+
+        .kpi-card.savings::before {
+            background: var(--primary-accent);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .kpi-value.savings {
+            color: var(--primary-accent);
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+        }
+
+        .chart-panel {
+            grid-column: span 3;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(16px);
+        }
+
+        .chart-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 380px;
+            position: relative;
+        }
+
+        .log-panel {
+            grid-column: span 3;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(16px);
+        }
+
+        .log-list {
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.25);
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.03);
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-item {
+            padding: 0.6rem 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .log-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--primary-accent);
+        }
+
+        .log-reason {
+            color: var(--text-color);
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--panel-border);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+            .chart-panel, .log-panel {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Eco-Loop AI Dashboard</h1>
+        <div class="badge">Closed-Loop Control Active</div>
+    </header>
+
+    <main>
+        <!-- KPI Cards -->
+        <div class="kpi-card">
+            <div class="kpi-label">Baseline Electricity</div>
+            <div class="kpi-value" id="kwh-base">0.00 kWh</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">AI Optimized Electricity</div>
+            <div class="kpi-value" id="kwh-optimized">0.00 kWh</div>
+        </div>
+
+        <div class="kpi-card savings">
+            <div class="kpi-label">Net Energy Savings %</div>
+            <div class="kpi-value savings" id="savings-pct">0.00 %</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Avg PMV (Base vs AI)</div>
+            <div class="kpi-value" id="pmv-average" style="font-size: 1.8rem; padding-top: 0.6rem;">0.00 / 0.00</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Comfort Violations (Base vs AI)</div>
+            <div class="kpi-value" id="pmv-violations" style="font-size: 1.8rem; padding-top: 0.6rem; color: #ff6b6b;">0 / 0</div>
+        </div>
+
+        <!-- Temperature Comparison Chart -->
+        <div class="chart-panel">
+            <div class="chart-title">
+                <span>HVAC Setpoints vs PMV Comfort Index</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="comfortChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Audit Log Panel -->
+        <div class="log-panel">
+            <div class="chart-title">LLM Optimization & Supervisory Actions Audit Log</div>
+            <div class="log-list" id="audit-logs">
+                <div style="padding: 1rem; text-align: center; color: var(--text-muted);">Fetching agent decision logs...</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function fetchMetrics() {
+            try {
+                const response = await fetch('/api/metrics');
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Populate KPI numbers
+                document.getElementById('kwh-base').innerText = data.totals.kwh_baseline.toLocaleString() + " kWh";
+                document.getElementById('kwh-optimized').innerText = data.totals.kwh_optimized.toLocaleString() + " kWh";
+                document.getElementById('savings-pct').innerText = data.totals.savings_percentage.toFixed(2) + " %";
+                
+                // Comfort metrics
+                document.getElementById('pmv-average').innerText = data.totals.avg_pmv_baseline + " / " + data.totals.avg_pmv_optimized;
+                document.getElementById('pmv-violations').innerText = data.totals.violations_baseline + " / " + data.totals.violations_optimized;
+
+                // Populate Chart
+                const labels = data.chart_data.optimized.map(r => r.Timestamp);
+                const outdoorTemps = data.chart_data.optimized.map(r => r.OutdoorTemp);
+                const baselineTemps = data.chart_data.baseline.map(r => r["Temp_SPACE1-1"]);
+                const optimizedTemps = data.chart_data.optimized.map(r => r["Temp_SPACE1-1"]);
+                const pmvComforts = data.chart_data.optimized.map(r => r.PMV);
+
+                const ctx = document.getElementById('comfortChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Site Outdoor Temp (°C)',
+                                data: outdoorTemps,
+                                borderColor: '#ff6b6b',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Baseline Temp (°C)',
+                                data: baselineTemps,
+                                borderColor: '#f1c40f',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'AI Optimized Temp (°C)',
+                                data: optimizedTemps,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'transparent',
+                                borderWidth: 3,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Occupant PMV Index',
+                                data: pmvComforts,
+                                borderColor: '#00ffcc',
+                                backgroundColor: 'rgba(0, 255, 204, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: 'Temperature (°C)', color: '#ffffff' },
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: 'Fanger PMV comfort Index', color: '#00ffcc' },
+                                grid: { drawOnChartArea: false },
+                                min: -3,
+                                max: 3,
+                                ticks: { color: '#00ffcc' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#f3f4f6' }
+                            }
+                        }
+                    }
+                });
+
+                // Populate Audit Log List
+                const logContainer = document.getElementById('audit-logs');
+                logContainer.innerHTML = '';
+                
+                // Show rows where agent reason is logged
+                const records = data.chart_data.optimized.filter(r => r.AgentReasoning && r.AgentReasoning !== "Using default fallback setpoints");
+                
+                if (records.length === 0) {
+                    logContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">No agent decision overrides found in logs.</div>';
+                    return;
+                }
+
+                records.reverse().forEach(r => {
+                    const item = document.createElement('div');
+                    item.className = 'log-item';
+                    item.innerHTML = `
+                        <div class="log-meta">
+                            <span>Time: ${r.Timestamp}</span>
+                            <span>Setpoints: Heat ${r.HeatingSetpoint}°C / Cool ${r.CoolingSetpoint}°C</span>
+                        </div>
+                        <div class="log-reason">> Reasoning: ${r.AgentReasoning}</div>
+                    `;
+                    logContainer.appendChild(item);
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.onload = fetchMetrics;
+    </script>
+</body>
+</html>
