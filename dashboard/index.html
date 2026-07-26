@@ -74,11 +74,12 @@
             margin: 2rem auto;
             padding: 0 2rem;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 2rem;
         }
 
         .kpi-card {
+            grid-column: span 2;
             background: var(--panel-bg);
             border: 1px solid var(--panel-border);
             border-radius: 20px;
@@ -87,6 +88,10 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+        }
+
+        .kpi-card.bottom-card {
+            grid-column: span 3;
         }
 
         .kpi-card::before {
@@ -101,6 +106,14 @@
 
         .kpi-card.savings::before {
             background: var(--primary-accent);
+        }
+
+        .kpi-card.comfort::before {
+            background: #ffaa00;
+        }
+
+        .kpi-card.violations::before {
+            background: #ff4d4d;
         }
 
         .kpi-card:hover {
@@ -130,8 +143,18 @@
             text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
         }
 
+        .kpi-value.comfort {
+            color: #ffaa00;
+            text-shadow: 0 0 20px rgba(255, 170, 0, 0.2);
+        }
+
+        .kpi-value.violations {
+            color: #ff4d4d;
+            text-shadow: 0 0 20px rgba(255, 77, 77, 0.2);
+        }
+
         .chart-panel {
-            grid-column: span 4;
+            grid-column: span 6;
             background: var(--panel-bg);
             border: 1px solid var(--panel-border);
             border-radius: 24px;
@@ -157,7 +180,7 @@
         }
 
         .log-panel {
-            grid-column: span 4;
+            grid-column: span 6;
             background: var(--panel-bg);
             border: 1px solid var(--panel-border);
             border-radius: 24px;
@@ -219,7 +242,7 @@
             main {
                 grid-template-columns: 1fr;
             }
-            .chart-panel, .log-panel {
+            .kpi-card, .kpi-card.bottom-card, .chart-panel, .log-panel {
                 grid-column: span 1;
             }
         }
@@ -232,32 +255,30 @@
     </header>
 
     <main>
-        <!-- KPI Cards Row -->
-        <div style="grid-column: span 4; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5rem;">
-            <div class="kpi-card">
-                <div class="kpi-label">Baseline Power</div>
-                <div class="kpi-value" id="kwh-base" style="font-size: 2rem;">0.00 kWh</div>
-            </div>
+        <!-- KPI Cards -->
+        <div class="kpi-card">
+            <div class="kpi-label">Baseline Electricity</div>
+            <div class="kpi-value" id="kwh-base">0.00 kWh</div>
+        </div>
 
-            <div class="kpi-card">
-                <div class="kpi-label">AI Optimized</div>
-                <div class="kpi-value" id="kwh-optimized" style="font-size: 2rem;">0.00 kWh</div>
-            </div>
+        <div class="kpi-card">
+            <div class="kpi-label">AI Optimized Electricity</div>
+            <div class="kpi-value" id="kwh-optimized">0.00 kWh</div>
+        </div>
 
-            <div class="kpi-card savings">
-                <div class="kpi-label">Net Savings</div>
-                <div class="kpi-value savings" id="savings-pct" style="font-size: 2.2rem;">0.00 %</div>
-            </div>
+        <div class="kpi-card savings">
+            <div class="kpi-label">Net Energy Savings %</div>
+            <div class="kpi-value savings" id="savings-pct">0.00 %</div>
+        </div>
 
-            <div class="kpi-card">
-                <div class="kpi-label">Avg PMV Index</div>
-                <div class="kpi-value" id="pmv-average" style="font-size: 1.8rem; padding-top: 0.3rem;">0.00 / 0.00</div>
-            </div>
+        <div class="kpi-card bottom-card comfort">
+            <div class="kpi-label">Avg PMV (Base vs AI)</div>
+            <div class="kpi-value comfort" id="pmv-average">0.00 / 0.00</div>
+        </div>
 
-            <div class="kpi-card">
-                <div class="kpi-label">Comfort Violations</div>
-                <div class="kpi-value" id="pmv-violations" style="font-size: 1.8rem; padding-top: 0.3rem; color: #ff6b6b;">0 / 0</div>
-            </div>
+        <div class="kpi-card bottom-card violations">
+            <div class="kpi-label">Comfort Violations (Base vs AI)</div>
+            <div class="kpi-value violations" id="pmv-violations">0 / 0</div>
         </div>
 
         <!-- Temperature Comparison Chart -->
