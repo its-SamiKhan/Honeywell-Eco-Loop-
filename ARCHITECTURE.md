@@ -76,3 +76,35 @@ Below is the verified performance comparison compiled from the EnergyPlus logs:
 | **Total Energy Used** | 499.78 kWh | 407.42 kWh | **-18.48% Energy Savings** 📉 |
 | **Average PMV Index** | -1.482 | -1.556 | Maintained within safe comfort range |
 | **Comfort Violations Count**| 572 | 623 | Intelligently balanced during severe cold weather |
+
+---
+
+## 5. Model Context Protocol (MCP) Integration
+
+To standardise the agent's interaction with the simulation environment, we expose a **Model Context Protocol (MCP)** JSON-RPC bridge built using FastAPI:
+
+```
++--------------------+            [MCP Request]           +----------------------+
+|  Cognitive Agent   |  ================================> |      MCP SERVER      |
+|  (Groq Llama 3.1)  |  <================================ |  (agent/mcp_server)  |
++--------------------+            [JSON-RPC Tool Output]  +----------+-----------+
+                                                                     |
+                                                                     | (Query / Write)
+                                                                     v
+                                                          +----------------------+
+                                                          |  Telemetry database  |
+                                                          |  & HVAC Actuators    |
+                                                          +----------------------+
+```
+
+### Protocol Endpoints:
+1. **List Tools (`GET /tools`)**: Returns available capability schemas for LLM tool binding.
+2. **Get Telemetry (`POST /tools/get_building_telemetry`)**: Returns real-time zone and environmental state (such as outdoor weather temperature, zone comfortable PMV, boiler/chiller electricity watt usage).
+3. **Apply Control Action (`POST /tools/apply_control_action`)**: Registers physical heating/cooling thermostat overrides, verifying interlocking boundaries.
+
+### Local Management Web UI:
+The MCP Server runs on port `8001` and features:
+* **Interactive Tool Playground (`/tools`)**: A visual playground allowing human operators to test tool calls directly and inspect inputs/outputs.
+* **API Documentation (`/docs`)**: Interactive Swagger UI mapping endpoint schemas, customized with a minimal navigation header linking back to the central hub.
+* **Light Theme Style**: Styled to match a modern light layout for a cohesive administrative dashboard experience.
+

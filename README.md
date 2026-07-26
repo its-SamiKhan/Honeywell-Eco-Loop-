@@ -21,9 +21,10 @@ Eco-Loop is a Physics-informed Autonomous Building Management Supervisory Agent.
   * `runner.py`: Baseline sandbox runner for unoptimized profiling benchmarks.
 * `agent/`
   * `agent_loop.py`: Orchestrates tools, context structure, and calls the Groq-hosted open-source model.
+  * `mcp_server.py`: Model Context Protocol Server JSON-RPC bridge containing tools for telemetry retrieval and thermostat actuation. Exposes interactive web-based tools dashboard at `/tools` and Swagger docs at `/docs` with light theme optimization.
 * `dashboard/`
   * `server.py`: FastAPI backend parsing simulation database logs and exposing comparative JSON metrics.
-  * `index.html`: Responsive, vibrant dark-mode dashboard comparing baseline vs optimized performance curves.
+  * `index.html`: Responsive, light-mode dashboard comparing baseline vs optimized performance curves.
 
 ---
 
@@ -50,8 +51,15 @@ Run the closed-loop optimization (uses Groq LLM API client):
 python simulation/closed_loop.py
 ```
 
-### 3. Launching the Web Dashboard
+### 3. Launching the Servers & Dashboards
+Launch the performance monitoring dashboard (runs on port 8000):
 ```bash
 python dashboard/server.py
 ```
 Open **[http://localhost:8000](http://localhost:8000)** in your browser.
+
+Launch the MCP Server (runs on port 8001):
+```bash
+python agent/mcp_server.py
+```
+Open **[http://localhost:8001](http://localhost:8001)** in your browser to view the root hub, the interactive **MCP Tools testing panel** at `/tools`, or the interactive **API Documentation** at `/docs`.
