@@ -72,7 +72,8 @@ def get_metrics():
         "chart_data": {
             "baseline": chart_base,
             "optimized": chart_ai
-        }
+        },
+        "full_optimized_logs": df_ai.to_dict(orient="records")
     }
 
 if __name__ == "__main__":

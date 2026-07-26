@@ -387,8 +387,8 @@
                 const logContainer = document.getElementById('audit-logs');
                 logContainer.innerHTML = '';
                 
-                // Show rows where agent reason is logged
-                const records = data.chart_data.optimized.filter(r => r.AgentReasoning && !r.AgentReasoning.toLowerCase().includes("default fallback"));
+                // Show rows where agent reason is logged from full log dataset to prevent decimation dropouts
+                const records = data.full_optimized_logs.filter(r => r.AgentReasoning && !r.AgentReasoning.toLowerCase().includes("default fallback"));
                 
                 if (records.length === 0) {
                     logContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">No agent decision overrides found in logs.</div>';
@@ -396,11 +396,12 @@
                 }
 
                 records.reverse().forEach(r => {
+                    const timeStr = r.Timestamp || `${r.Month}/${r.Day} ${String(r.Hour).padStart(2, '0')}:${String(r.Minute).padStart(2, '0')}`;
                     const item = document.createElement('div');
                     item.className = 'log-item';
                     item.innerHTML = `
                         <div class="log-meta">
-                            <span>Time: ${r.Timestamp}</span>
+                            <span>Time: ${timeStr}</span>
                             <span>Setpoints: Heat ${r.HeatingSetpoint}°C / Cool ${r.CoolingSetpoint}°C</span>
                         </div>
                         <div class="log-reason">> Reasoning: ${r.AgentReasoning}</div>
