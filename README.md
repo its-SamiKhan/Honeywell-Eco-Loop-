@@ -63,3 +63,36 @@ Launch the MCP Server (runs on port 8001):
 python agent/mcp_server.py
 ```
 Open **[http://localhost:8001](http://localhost:8001)** in your browser to view the root hub, the interactive **MCP Tools testing panel** at `/tools`, or the interactive **API Documentation** at `/docs`.
+
+---
+
+## 🎛️ Real Building Ingestion (BACnet/BMS Bridge)
+
+To transition this PoC from the EnergyPlus simulator sandbox to a live building, swap the simulation data-exchange calls for physical building protocol drivers (e.g. BACnet IP / MSTP):
+
+```
++--------------------+         BACnet/IP          +--------------------------+
+| Physical BMS       | <========================> | BACnet Gateway Client    |
+| (Thermostats, AHU) |    (Read/Write Commands)   | (e.g., using BAC0)       |
++--------------------+                            +------------+-------------+
+                                                               |
+                                                               | (Telemetry JSON)
+                                                               v
++--------------------+        Apply Overrides     +--------------------------+
+| HVAC Actuators /   | <========================> | Eco-Loop MCP Server      |
+| Setpoint Registers |        (BACnet Write)      | (agent/mcp_server.py)    |
++--------------------+                            +--------------------------+
+```
+
+### Transition Roadmap:
+1. **Telemetry Ingestion**: Instead of parsing the local `telemetry.csv` file, the `/tools/get_building_telemetry` tool queries active BACnet points:
+   ```python
+   import BAC0
+   bacnet = BAC0.connect(ip="192.168.1.100")
+   zone_temp = bacnet.read("1:Analog Input, 1") # Physical Zone Sensor
+   ```
+2. **Control Execution**: In the `/tools/apply_control_action` tool, redirect setpoint actuators to BMS analog write objects:
+   ```python
+   bacnet.write("1:Analog Value, 5", action.heating_setpoint) # Thermostat Heat register
+   ```
+

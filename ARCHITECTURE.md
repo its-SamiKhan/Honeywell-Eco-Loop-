@@ -108,3 +108,46 @@ The MCP Server runs on port `8001` and features:
 * **API Documentation (`/docs`)**: Interactive Swagger UI mapping endpoint schemas, customized with a minimal navigation header linking back to the central hub.
 * **Light Theme Style**: Styled to match a modern light layout for a cohesive administrative dashboard experience.
 
+---
+
+## 6. Physical BMS & Real-World Ingestion
+
+Moving the Eco-Loop platform from a simulation context (EnergyPlus) to a real building automation system (BMS) replaces the Python SDK APIs with **industrial network protocols**.
+
+```
++--------------------------------------------------------------------------------+
+|                             PHYSICAL ENVIRONMENT                               |
+|                                                                                |
+|  +---------------------+                       +----------------------------+  |
+|  |   Physical BMS      | ===== BACnet/IP ===== |   Eco-Loop Driver Bridge   |  |
+|  | (Honeywell Niagara, | <===================> |   (BMS integration node)   |  |
+|  |  Siemens Desigo)    |       read/write      |  - Converts point readings |  |
+|  +---------------------+                       |    to uniform telemetry   |  |
+|                                                |  - Accepts control writes  |  |
+|                                                +-------------+--------------+  |
++--------------------------------------------------------------|-----------------+
+                                                               |
+                                                               | (API JSON payload)
+                                                               v
+                                                 +----------------------------+
+                                                 |    Eco-Loop MCP Server     |
+                                                 |    (agent/mcp_server.py)   |
+                                                 +----------------------------+
+```
+
+### Ingestion Flow:
+1. **Connection Broker**: Establish a serial/ethernet gateway link to the building network using open-source libraries such as `BAC0` (Python BACnet router).
+2. **Point Discovery**: Map physical thermostat objects (Analog Inputs for temperature sensors, Analog Values for temperature setpoints).
+3. **Data Polling (BMS -> MCP)**: Telemetry functions read sensors directly from the network instead of local database logs:
+   ```python
+   # Reads physical zone sensor
+   temp = bacnet.read("10:Analog Input, 3")
+   ```
+4. **Action Override Injection (MCP -> BMS)**: Directs thermostat write overrides straight to BMS actuators:
+   ```python
+   # Sets physical heating setpoint register
+   bacnet.write("10:Analog Value, 1", action.heating_setpoint)
+   ```
+5. **Fail-Safe Integrity**: Real controllers include automated fallback timers. If the MCP Server stops sending updates (due to network or API loss), the local controller automatically releases overrides and returns control back to the baseline physical schedules.
+
+
