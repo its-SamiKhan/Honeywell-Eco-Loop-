@@ -58,12 +58,58 @@ The system employs a strict JSON tool contract forcing the agent to reason about
 
 ---
 
-## 3. supervisory Control & API Latency Management
+## 3. Cognitive Optimization & Pipeline Orchestration
 
-To handle networking calls and potential rate limiters during high-frequency simulation runs, the framework utilizes two key strategies:
+Building control systems operate under strict timing windows and generate vast quantities of data. To make LLM-driven supervisory control robust, the system integrates advanced prompt engineering, latency management, and telemetry data processing pipelines.
 
-* **Decimated Decision Windows**: Instead of calling the LLM at every minute interval, the supervisor operates at **1-hour decision frames** (4 timesteps). This significantly reduces API tokens, optimizes computation cost, and aligns with physical building thermal inertia.
-* **Smart Physical Backup System**: If the API times out or hits an HTTP 429 rate limit, the system gracefully falls back to a **rule-based physical lookup** that matches the active zone temperature trend to keep the environment safe.
+```
+       +-----------------------------------------------------------------+
+       |                  SIMULATION STEP TELEMETRY                      |
+       |  (Zone Temp, Outdoor Temp, PMV comfort, Timestep kWh usage)     |
+       +-------------------------------+---------------------------------+
+                                       |
+                                       v
+       +-----------------------------------------------------------------+
+       |                  TELEMETRY LOG COMPACTOR                        |
+       |  - Decimates continuous readings to 1-hour interval matrices    |
+       |  - Compresses tabular outputs into windowed state frames        |
+       +-------------------------------+---------------------------------+
+                                       |
+                                       v
+       +-----------------------------------------------------------------+
+       |                  COGNITIVE REASONING PIPELINE                   |
+       |                                                                 |
+       |  [A. Prompt Engineering]                                        |
+       |  - Strict system roles defining thermal constraints             |
+       |  - Zero-shot JSON schema enforcement templates                  |
+       |                                                                 |
+       |  [B. Latency & Fallback Router]                                 |
+       |  - Connection Timeout threshold limits (capped at 8 seconds)    |
+       |  - Rule-based backup lookup acts as buffer for API drops        |
+       +-------------------------------+---------------------------------+
+                                       |
+                                       v
+       +-----------------------------------------------------------------+
+       |                  THERMOSTAT OVERRIDE ACTION                     |
+       +-----------------------------------------------------------------+
+```
+
+### A. Prompt Engineering Strategies
+The agent utilizes structured prompts designed for closed-loop industrial controls:
+* **System Prompt Constraints**: Configured as an HVAC control specialist, the LLM is instructed to strictly balance energy savings against thermal comfort boundaries (PMV index between -0.7 and +0.7).
+* **Deterministic Output Schemas**: Prompt formats enforce standard JSON structures. The LLM must output values within the parameters: `heating_setpoint` (float), `cooling_setpoint` (float), and `reasoning` (string). This ensures output parser compatibility.
+
+### B. Prompt Latency Management
+Network latency and model inference delays present challenges for real-time controllers. We mitigate this with:
+* **Decimated Decision Windows**: Instead of calling the LLM at every timestep (e.g., every 15 minutes), the agent operates on **1-hour interval decision windows** (4 timesteps). This reduces token usage, API request frequency, and allows the building to settle between thermal changes.
+* **Timeout Protections**: API calls are configured with a strict **8-second connection timeout**.
+* **Fail-Safe Physical Rules Backup**: If the network times out or hits an HTTP 429 rate limit, the controller automatically triggers a rule-based backup strategy. This backup restores safe fallback setpoints based on the latest PMV readings until the API recovers, ensuring building comfort is maintained.
+
+### C. Processing Lengthy Simulation Logs
+A typical multi-zone energy simulation generates millions of rows of telemetry data across `.eso` and `.mtr` output files, which can overwhelm the LLM's context window. We manage this with:
+* **Timestep Filtering**: The Python runtime callback reads metrics only when `warmup_flag(state)` is false, ignoring irrelevant initialization cycles.
+* **On-the-Fly Aggregation**: In-memory statistics collect averages dynamically at each step and write clean, structured rows to `ai_telemetry.csv`, keeping file sizes compact.
+* **API Log Decimation**: The dashboard backend decimates the telemetry rows (by a factor of `len(df) // 100`) before rendering. This keeps data payloads lightweight, speeds up load times, and prevents browser canvas charts from lagging.
 
 ---
 
