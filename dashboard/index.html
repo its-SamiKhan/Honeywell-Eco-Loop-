@@ -8,14 +8,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #fafafa;
-            --panel-bg: #ffffff;
-            --panel-border: #e8e8e8;
-            --primary-accent: #10b981;
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(22, 28, 45, 0.65);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --primary-accent: #00ffcc;
             --secondary-accent: #3b82f6;
-            --text-color: #3b4151;
-            --text-muted: #6b7280;
-            --shadow-glow: rgba(16, 185, 129, 0.05);
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --shadow-glow: rgba(0, 255, 204, 0.15);
         }
 
         * {
@@ -30,8 +30,8 @@
             color: var(--text-color);
             min-height: 100vh;
             overflow-x: hidden;
-            background-image: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.02) 0%, transparent 40%),
-                              radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.02) 0%, transparent 40%);
+            background-image: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(0, 255, 204, 0.08) 0%, transparent 40%);
         }
 
         header {
@@ -44,7 +44,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(11, 15, 25, 0.8);
         }
 
         h1 {
@@ -52,18 +52,21 @@
             font-weight: 700;
             font-size: 1.8rem;
             letter-spacing: -1px;
-            color: #3b4151;
+            background: linear-gradient(to right, #ffffff, var(--primary-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .badge {
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(0, 255, 204, 0.1);
             color: var(--primary-accent);
-            border: 1px solid rgba(16, 185, 129, 0.25);
+            border: 1px solid rgba(0, 255, 204, 0.25);
             padding: 0.4rem 1rem;
             border-radius: 50px;
             font-size: 0.85rem;
             font-weight: 600;
             letter-spacing: 0.5px;
+            box-shadow: 0 0 15px var(--shadow-glow);
         }
 
         main {
@@ -80,7 +83,7 @@
             border: 1px solid var(--panel-border);
             border-radius: 20px;
             padding: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            backdrop-filter: blur(16px);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -102,8 +105,8 @@
 
         .kpi-card:hover {
             transform: translateY(-5px);
-            border-color: #d1d5db;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .kpi-label {
@@ -120,11 +123,11 @@
             font-size: 2.8rem;
             font-weight: 700;
             line-height: 1.1;
-            color: #3b4151;
         }
 
         .kpi-value.savings {
             color: var(--primary-accent);
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
         }
 
         .chart-panel {
@@ -133,7 +136,7 @@
             border: 1px solid var(--panel-border);
             border-radius: 24px;
             padding: 2.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            backdrop-filter: blur(16px);
         }
 
         .chart-title {
@@ -141,7 +144,7 @@
             font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            color: #3b4151;
+            color: #ffffff;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -159,7 +162,7 @@
             border: 1px solid var(--panel-border);
             border-radius: 24px;
             padding: 2.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            backdrop-filter: blur(16px);
         }
 
         .log-list {
@@ -167,16 +170,16 @@
             max-height: 300px;
             overflow-y: auto;
             border-radius: 12px;
-            background: #f8fafc;
+            background: rgba(0,0,0,0.25);
             padding: 1rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.03);
             font-family: monospace;
             font-size: 0.9rem;
         }
 
         .log-item {
             padding: 0.6rem 0.8rem;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             display: flex;
             flex-direction: column;
             gap: 0.3rem;
@@ -189,8 +192,7 @@
         .log-meta {
             display: flex;
             justify-content: space-between;
-            color: var(--secondary-accent);
-            font-weight: 600;
+            color: var(--primary-accent);
         }
 
         .log-reason {
@@ -210,7 +212,7 @@
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0,0,0,0.15);
+            background: rgba(255,255,255,0.2);
         }
 
         @media (max-width: 1024px) {
@@ -336,8 +338,8 @@
                             {
                                 label: 'Occupant PMV Index',
                                 data: pmvComforts,
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderColor: '#00ffcc',
+                                backgroundColor: 'rgba(0, 255, 204, 0.1)',
                                 borderWidth: 2,
                                 fill: true,
                                 yAxisID: 'y1'
@@ -353,31 +355,31 @@
                         },
                         scales: {
                             x: {
-                                grid: { color: 'rgba(0,0,0,0.05)' },
-                                ticks: { color: '#64748b' }
+                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                ticks: { color: '#9ca3af' }
                             },
                             y: {
                                 type: 'linear',
                                 display: true,
                                 position: 'left',
-                                title: { display: true, text: 'Temperature (°C)', color: '#3b4151' },
-                                grid: { color: 'rgba(0,0,0,0.05)' },
-                                ticks: { color: '#64748b' }
+                                title: { display: true, text: 'Temperature (°C)', color: '#ffffff' },
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#9ca3af' }
                             },
                             y1: {
                                 type: 'linear',
                                 display: true,
                                 position: 'right',
-                                title: { display: true, text: 'Fanger PMV comfort Index', color: '#10b981' },
+                                title: { display: true, text: 'Fanger PMV comfort Index', color: '#00ffcc' },
                                 grid: { drawOnChartArea: false },
                                 min: -3,
                                 max: 3,
-                                ticks: { color: '#10b981' }
+                                ticks: { color: '#00ffcc' }
                             }
                         },
                         plugins: {
                             legend: {
-                                labels: { color: '#3b4151' }
+                                labels: { color: '#f3f4f6' }
                             }
                         }
                     }
